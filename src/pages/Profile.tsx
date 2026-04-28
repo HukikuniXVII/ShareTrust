@@ -1,0 +1,130 @@
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { ShieldCheck, Star, MapPin, Calendar, BadgeCheck, MessageCircle, Share2, Award } from 'lucide-react';
+import { motion } from 'motion/react';
+import { MOCK_USERS, MOCK_GEAR } from '../constants/mockData';
+import { cn } from '../lib/utils';
+
+export default function Profile() {
+  const { id } = useParams();
+  const user = MOCK_USERS.find(u => u.id === (id || 'u1')) || MOCK_USERS[0];
+  const userGear = MOCK_GEAR.filter(g => g.ownerId === user.id);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Sidebar - User Info */}
+      <aside className="space-y-6">
+        <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm text-center relative overflow-hidden">
+          {/* Decorative Background */}
+          <div className="absolute top-0 left-0 right-0 h-24 bg-brand-accent/5 -z-0" />
+          
+          <div className="relative z-10 pt-4">
+            <div className="relative inline-block">
+              <img src={user.avatar} alt={user.name} className="w-32 h-32 rounded-3xl object-cover border-4 border-white shadow-lg mx-auto" />
+              {user.isVerified && (
+                <div className="absolute -bottom-2 -right-2 bg-trust-green text-white p-1.5 rounded-xl border-4 border-white shadow-md">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-6 space-y-2">
+              <h1 className="text-2xl font-bold text-brand-primary">{user.name}</h1>
+              <div className="flex items-center justify-center gap-2 text-gray-400 text-sm">
+                <MapPin className="w-4 h-4" />
+                <span>{user.location}</span>
+                <span className="text-gray-200">|</span>
+                <Calendar className="w-4 h-4" />
+                <span>Joined {user.joinDate}</span>
+              </div>
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 rounded-2xl">
+                <div className="text-2xl font-black text-brand-primary">{user.trustScore}%</div>
+                <div className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Trust Score</div>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-2xl">
+                <div className="text-2xl font-black text-brand-primary">{userGear.length}</div>
+                <div className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Items</div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex gap-2">
+              <button className="flex-1 py-3 bg-brand-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-opacity-90 transition-all shadow-lg shadow-brand-primary/10">
+                <MessageCircle className="w-4 h-4" />
+                Message
+              </button>
+              <button className="p-3 bg-gray-50 text-gray-500 rounded-xl hover:bg-gray-100 transition-all">
+                <Share2 className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm space-y-4">
+          <h2 className="text-sm font-bold uppercase text-gray-400 tracking-wider">Verification</h2>
+          <div className="space-y-3">
+            {[
+              { label: 'Identity Verified', icon: BadgeCheck, status: 'verified' },
+              { label: 'Neighbor Reference', icon: Award, status: 'verified' },
+              { label: 'Criminal Records', icon: ShieldCheck, status: 'verified' },
+            ].map((v, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-trust-green/10 flex items-center justify-center text-trust-green">
+                  <v.icon className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">{v.label}</span>
+                <span className="ml-auto text-[10px] font-bold text-trust-green uppercase">Clear</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="lg:col-span-2 space-y-8">
+        <section className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm">
+          <h2 className="text-xl font-bold mb-4">About</h2>
+          <p className="text-gray-600 leading-relaxed">
+            {user.bio}
+          </p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {user.badges.map(badge => (
+              <span key={badge} className="px-4 py-1.5 bg-gray-50 text-gray-600 rounded-full text-xs font-medium border border-gray-100">
+                {badge}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold">Gear Available ({userGear.length})</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {userGear.map(item => (
+              <Link to={`/item/${item.id}`} key={item.id} className="block">
+                <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex gap-4">
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0">
+                    <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                  <div className="flex flex-col justify-between py-1">
+                    <div>
+                      <h3 className="font-bold text-brand-primary leading-tight line-clamp-1">{item.name}</h3>
+                      <div className="flex items-center gap-1 text-trust-gold mt-1">
+                        <Star className="w-3 h-3 fill-current" />
+                        <span className="text-xs font-bold">{item.rating}</span>
+                      </div>
+                    </div>
+                    <div className="text-sm font-black text-brand-accent">
+                      ${item.pricePerDay}<span className="text-[10px] font-normal text-gray-400">/day</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}

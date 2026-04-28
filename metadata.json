@@ -1,0 +1,10 @@
+{
+  "name": "ShareTrust",
+  "description": "A high-trust peer-to-peer gear rental platform. Share cameras, tools, and outdoor equipment with verified neighbors.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
