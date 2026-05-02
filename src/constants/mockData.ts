@@ -39,6 +39,7 @@ export const MOCK_GEAR: GearItem[] = [
     ],
     status: RentalStatus.AVAILABLE,
     location: 'Brooklyn, NY',
+    neighborhood: 'Prospect Park South',
     tags: ['Sony', 'Full Frame', 'Hybrid'],
     rating: 4.9,
     reviewCount: 24
@@ -55,6 +56,7 @@ export const MOCK_GEAR: GearItem[] = [
     ],
     status: RentalStatus.AVAILABLE,
     location: 'Queens, NY',
+    neighborhood: 'Astoria',
     tags: ['DeWalt', 'Power Tool', 'DIY'],
     rating: 4.8,
     reviewCount: 12
@@ -71,6 +73,7 @@ export const MOCK_GEAR: GearItem[] = [
     ],
     status: RentalStatus.RENTED,
     location: 'Brooklyn, NY',
+    neighborhood: 'Bushwick',
     tags: ['Drone', 'DJI', '4K'],
     rating: 5.0,
     reviewCount: 8
@@ -87,8 +90,27 @@ export const MOCK_GEAR: GearItem[] = [
     ],
     status: RentalStatus.AVAILABLE,
     location: 'Queens, NY',
+    neighborhood: 'Long Island City',
     tags: ['Camping', 'Outdoor', 'Tent'],
     rating: 4.5,
     reviewCount: 15
+  },
+  {
+    id: '5',
+    ownerId: 'u2',
+    name: 'MacBook Pro M3 Max (64GB RAM)',
+    description: 'Ultra-powerful workstation for video editing and 3D rendering. Comes with a protective hard shell case and 140W fast charger.',
+    category: Category.ELECTRONICS,
+    pricePerDay: 85,
+    images: [
+      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&q=80',
+      'https://images.unsplash.com/photo-1611186871348-b1ec696e520b?w=800&q=80'
+    ],
+    status: RentalStatus.AVAILABLE,
+    location: 'Manhattan, NY',
+    neighborhood: 'Chelsea',
+    tags: ['Apple', 'Workstation', 'Video Editing'],
+    rating: 4.9,
+    reviewCount: 32
   }
 ];

@@ -81,11 +81,20 @@ export default function Messages() {
                 </div>
                 <div>
                   <h2 className="font-bold text-brand-primary">{chats.find(c => c.id === selectedChat)?.user.name}</h2>
-                  <span className="text-[10px] font-bold text-trust-green uppercase tracking-wider">Online</span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 bg-trust-green rounded-full animate-pulse" />
+                    <span className="text-[10px] font-bold text-trust-green uppercase tracking-wider">Online</span>
+                    <span className="text-[10px] text-gray-300 mx-1">•</span>
+                    <MapPin className="w-2.5 h-2.5 text-gray-400" />
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{chats.find(c => c.id === selectedChat)?.user.location}</span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="p-2 text-gray-400 hover:text-brand-primary"><MoreVertical className="w-5 h-5" /></button>
+                <button title="Pickup Location" className="p-2 text-brand-accent hover:bg-brand-accent/5 rounded-xl transition-all">
+                  <MapPin className="w-5 h-5" />
+                </button>
+                <button className="p-2 text-gray-400 hover:text-brand-primary transition-all"><MoreVertical className="w-5 h-5" /></button>
               </div>
             </div>
 

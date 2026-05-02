@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ShieldCheck, Star, MapPin, Calendar, BadgeCheck, MessageCircle, Share2, Award } from 'lucide-react';
+import { ShieldCheck, Star, MapPin, Calendar, BadgeCheck, MessageCircle, Share2, Award, UserPlus, Fingerprint } from 'lucide-react';
 import { motion } from 'motion/react';
 import { MOCK_USERS, MOCK_GEAR } from '../constants/mockData';
 import { cn } from '../lib/utils';
+import IdentityVerificationModal from '../components/IdentityVerificationModal';
 
 export default function Profile() {
   const { id } = useParams();
+  const [showVerification, setShowVerification] = useState(false);
+  const [, setTick] = useState(0); // For forcing re-render
   const user = MOCK_USERS.find(u => u.id === (id || 'u1')) || MOCK_USERS[0];
   const userGear = MOCK_GEAR.filter(g => g.ownerId === user.id);
+
+  // For demo: show verification section only on "my" profile (u1)
+  const isMyProfile = !id || id === 'u1';
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -66,21 +72,55 @@ export default function Profile() {
           <h2 className="text-sm font-bold uppercase text-gray-400 tracking-wider">Verification</h2>
           <div className="space-y-3">
             {[
-              { label: 'Identity Verified', icon: BadgeCheck, status: 'verified' },
+              { label: 'Identity Verified', icon: BadgeCheck, status: user.isVerified ? 'verified' : 'pending' },
               { label: 'Neighbor Reference', icon: Award, status: 'verified' },
               { label: 'Criminal Records', icon: ShieldCheck, status: 'verified' },
             ].map((v, i) => (
               <div key={i} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-trust-green/10 flex items-center justify-center text-trust-green">
+                <div className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center",
+                  v.status === 'verified' ? "bg-trust-green/10 text-trust-green" : "bg-gray-100 text-gray-400"
+                )}>
                   <v.icon className="w-4 h-4" />
                 </div>
                 <span className="text-sm font-medium text-gray-700">{v.label}</span>
-                <span className="ml-auto text-[10px] font-bold text-trust-green uppercase">Clear</span>
+                <span className={cn(
+                  "ml-auto text-[10px] font-bold uppercase",
+                  v.status === 'verified' ? "text-trust-green" : "text-gray-400"
+                )}>
+                  {v.status === 'verified' ? "Clear" : "Pending"}
+                </span>
               </div>
             ))}
           </div>
+          
+          {isMyProfile && !user.isVerified && (
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowVerification(true)}
+              className="w-full mt-4 p-4 bg-brand-accent/10 border border-brand-accent/20 rounded-2xl flex items-center gap-4 group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-brand-accent text-white flex items-center justify-center shrink-0">
+                <Fingerprint className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-black text-brand-primary uppercase tracking-wider">Verify Identity</p>
+                <p className="text-[10px] text-brand-accent font-bold">Secure your account now</p>
+              </div>
+            </motion.button>
+          )}
         </div>
       </aside>
+
+      <IdentityVerificationModal 
+        isOpen={showVerification} 
+        onClose={() => setShowVerification(false)}
+        onComplete={() => {
+          user.isVerified = true;
+          setTick(t => t + 1);
+        }}
+      />
 
       {/* Main Content */}
       <main className="lg:col-span-2 space-y-8">

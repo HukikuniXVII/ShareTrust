@@ -44,6 +44,11 @@ export interface GearItem {
   images: string[];
   status: RentalStatus;
   location: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  neighborhood?: string;
   tags: string[];
   rating: number;
   reviewCount: number;

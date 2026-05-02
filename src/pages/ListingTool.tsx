@@ -14,7 +14,9 @@ export default function ListingTool() {
     description: '',
     category: Category.OTHER,
     pricePerDay: 0,
-    images: [] as string[]
+    images: [] as string[],
+    location: '',
+    neighborhood: ''
   });
 
   const extractImages = async () => {
@@ -255,6 +257,29 @@ export default function ListingTool() {
                         className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
                         value={formData.pricePerDay || ''}
                         onChange={e => setFormData({...formData, pricePerDay: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Pickup Neighborhood</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g., Williamsburg"
+                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
+                        value={formData.neighborhood}
+                        onChange={e => setFormData({...formData, neighborhood: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">City, State</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g., Brooklyn, NY"
+                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
+                        value={formData.location}
+                        onChange={e => setFormData({...formData, location: e.target.value})}
                       />
                     </div>
                   </div>
