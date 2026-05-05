@@ -112,5 +112,23 @@ export const MOCK_GEAR: GearItem[] = [
     tags: ['Apple', 'Workstation', 'Video Editing'],
     rating: 4.9,
     reviewCount: 32
+  },
+  {
+    id: '6',
+    ownerId: 'u1',
+    name: 'Sony A7IV Mirrorless Camera',
+    description: 'Professional full-frame mirrorless camera. Perfect for high-end photography and 4K video. Includes 24-70mm GM lens.',
+    category: Category.PHOTOGRAPHY,
+    pricePerDay: 45,
+    images: [
+      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80',
+      'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=800&q=80'
+    ],
+    status: RentalStatus.AVAILABLE,
+    location: 'Brooklyn, NY',
+    neighborhood: 'Williamsburg',
+    tags: ['Sony', 'Camera', 'Professional'],
+    rating: 4.8,
+    reviewCount: 56
   }
 ];

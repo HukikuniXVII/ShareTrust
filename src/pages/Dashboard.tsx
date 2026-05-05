@@ -1,11 +1,14 @@
-import React from 'react';
-import { LayoutDashboard, ReceiptText, Clock, Bell, Settings, Package, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import React, { useState } from 'react';
+import { LayoutDashboard, ReceiptText, Clock, Bell, Settings, Package, ArrowUpRight, ArrowDownLeft, ShieldCheck, CheckCircle2, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { MOCK_GEAR } from '../constants/mockData';
 import { cn } from '../lib/utils';
 import { RentalStatus } from '../types';
+import HandoverChecklist from '../components/HandoverChecklist';
 
 export default function Dashboard() {
+  const [showHandover, setShowHandover] = useState(false);
+  const [selectedGear, setSelectedGear] = useState(MOCK_GEAR[0]);
   const stats = [
     { label: 'Active Rentals', value: '3', icon: Package, color: 'text-brand-accent' },
     { label: 'Pending Requests', value: '2', icon: Clock, color: 'text-trust-gold' },
@@ -17,8 +20,23 @@ export default function Dashboard() {
     { type: 'rental_complete', item: 'DeWalt Drill', user: 'Mike R.', status: 'Completed', date: 'Yesterday', price: '$30' },
   ];
 
+  const statStyle = (status: string) => {
+    switch (status) {
+      case 'Pending': return 'w-10 h-10 rounded-xl bg-trust-gold/10 flex items-center justify-center text-trust-gold';
+      case 'Completed': return 'w-10 h-10 rounded-xl bg-trust-green/10 flex items-center justify-center text-trust-green';
+      default: return 'w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500';
+    }
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
+      <HandoverChecklist 
+        isOpen={showHandover} 
+        onClose={() => setShowHandover(false)} 
+        item={selectedGear} 
+        type="pickup"
+      />
+
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold text-brand-primary">Dashboard</h1>
@@ -34,6 +52,49 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* Active Handover Panel */}
+      <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-sm overflow-hidden relative group">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-accent/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-brand-accent/10" />
+        <div className="relative z-10 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-brand-accent/10 flex items-center justify-center text-brand-accent">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h2 className="text-xl font-black text-brand-primary">Active Handover</h2>
+            </div>
+            <span className="text-[10px] font-black uppercase text-brand-accent bg-brand-accent/10 px-3 py-1 rounded-full animate-pulse">Required</span>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center gap-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-sm shrink-0">
+               <img src={MOCK_GEAR[0].images[0]} alt="" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <h3 className="text-lg font-black text-brand-primary">{MOCK_GEAR[0].name}</h3>
+              <p className="text-sm text-gray-500 font-medium">Recipient: <span className="text-brand-primary font-bold">James Wilson</span></p>
+              <div className="flex items-center gap-3 mt-2">
+                <span className="flex items-center gap-1.5 text-[10px] font-bold text-trust-green uppercase">
+                  <CheckCircle2 className="w-3 h-3" /> Identity Verified
+                </span>
+                <span className="flex items-center gap-1.5 text-[10px] font-bold text-brand-accent uppercase">
+                  <ShieldCheck className="w-3 h-3" /> $1,200 Held
+                </span>
+              </div>
+            </div>
+            <button 
+              onClick={() => {
+                setSelectedGear(MOCK_GEAR[0]);
+                setShowHandover(true);
+              }}
+              className="w-full md:w-auto px-8 py-4 bg-brand-primary text-white rounded-2xl font-black text-sm shadow-xl shadow-brand-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              Begin Smart Handover
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, i) => (

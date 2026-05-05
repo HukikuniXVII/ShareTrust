@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Fingerprint, CheckCircle2, Camera, Lock, ShieldAlert, CreditCard, Wallet, ExternalLink, Loader2, ShieldCheck, MessageSquare, Calendar, PenTool, FileSignature, Shield, UserCheck, Plus, AlertCircle, ArrowRight } from 'lucide-react';
+import { X, Fingerprint, CheckCircle2, Camera, Lock, ShieldAlert, CreditCard, Wallet, ExternalLink, Loader2, ShieldCheck, MessageSquare, Calendar, PenTool, FileSignature, Shield, UserCheck, Plus, AlertCircle, ArrowRight, Truck, Store, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { GearItem } from '../types';
 import { MOCK_USERS } from '../constants/mockData';
@@ -122,17 +122,18 @@ const SignaturePad = ({ onComplete }: { onComplete: (signature: string) => void 
 
 export default function CheckoutModal({ isOpen, onClose, item }: CheckoutModalProps) {
   const [step, setStep] = React.useState<'summary' | 'verifying' | 'signing' | 'success'>('summary');
+  const [deliveryType, setDeliveryType] = useState<'pickup' | 'courier'>('pickup');
   const [isAgreed, setIsAgreed] = useState(false);
   const navigate = useNavigate();
-  const currentUser = MOCK_USERS[0]; // Assuming Sarah Jenkins is the logged-in user
+  const currentUser = MOCK_USERS[0];
   const isVerified = currentUser.isVerified;
 
   const rentalDays = 3;
   const rentalFee = item.pricePerDay * rentalDays;
-  const trustFee = 15.00;
-  const taxes = rentalFee * 0.08;
-  const totalAmount = rentalFee + trustFee + taxes;
-  const holdAmount = 1200.00; // Mocked high value for pre-auth
+  const deliveryFee = deliveryType === 'courier' ? 120.00 : 0;
+  const trustSafetyFee = 45.00; // Platform monetization via renter fee
+  const totalAmount = rentalFee + trustSafetyFee + deliveryFee;
+  const holdAmount = item.pricePerDay * 12; // Example replacement value hold amount
 
   const handleStartVerification = () => {
     setStep('verifying');
@@ -237,38 +238,105 @@ export default function CheckoutModal({ isOpen, onClose, item }: CheckoutModalPr
                       </>
                     )}
 
+                    {/* Handover & Delivery Options */}
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.1em]">Handover Method</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button 
+                          onClick={() => setDeliveryType('pickup')}
+                          className={cn(
+                            "group p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2",
+                            deliveryType === 'pickup' ? "border-brand-accent bg-brand-accent/5 shadow-sm" : "border-gray-50 bg-gray-50 hover:border-gray-200"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                            deliveryType === 'pickup' ? "bg-brand-accent text-white" : "bg-white text-gray-400 group-hover:text-brand-accent"
+                          )}>
+                            <Store className="w-5 h-5" />
+                          </div>
+                          <div className="text-center">
+                            <p className={cn("text-xs font-bold", deliveryType === 'pickup' ? "text-brand-primary" : "text-gray-500")}>Self Pickup</p>
+                            <p className="text-[10px] text-gray-400 font-medium">Meet neighbor</p>
+                          </div>
+                        </button>
+
+                        <button 
+                          onClick={() => setDeliveryType('courier')}
+                          className={cn(
+                            "group p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2",
+                            deliveryType === 'courier' ? "border-brand-accent bg-brand-accent/5 shadow-sm" : "border-gray-50 bg-gray-50 hover:border-gray-200"
+                          )}
+                        >
+                          <div className="relative">
+                            <div className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                              deliveryType === 'courier' ? "bg-brand-accent text-white" : "bg-white text-gray-400 group-hover:text-brand-accent"
+                            )}>
+                              <Truck className="w-5 h-5" />
+                            </div>
+                            <span className="absolute -top-1 -right-1 bg-trust-green text-white text-[8px] font-black px-1.5 py-0.5 rounded-md shadow-sm border border-white">LIVE</span>
+                          </div>
+                          <div className="text-center">
+                            <p className={cn("text-xs font-bold", deliveryType === 'courier' ? "text-brand-primary" : "text-gray-500")}>Secure Delivery</p>
+                            <p className="text-[10px] text-gray-400 font-medium">Grab / Lalamove</p>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
                     {/* Payment Breakdown */}
                     <div className="space-y-4 pt-2">
-                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.1em]">Payment Breakdown</h4>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-500 font-medium tracking-tight">Rental Fee ({rentalDays} days)</span>
-                          <span className="text-sm font-black text-brand-primary">${rentalFee.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-500 font-medium tracking-tight">Trust & Safety Fee (Includes Insurance)</span>
-                          <span className="text-sm font-black text-brand-primary">${trustFee.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-500 font-medium tracking-tight">Taxes</span>
-                          <span className="text-sm font-black text-brand-primary">${taxes.toFixed(2)}</span>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-[0.1em]">Payment Breakdown</h4>
+                        <div className="flex items-center gap-1.5 bg-trust-green/10 px-2.5 py-1 rounded-full border border-trust-green/10">
+                          <CheckCircle2 className="w-3 h-3 text-trust-green" />
+                          <span className="text-[10px] font-black text-trust-green uppercase tracking-wide">0% Host Fee</span>
                         </div>
                       </div>
-                      <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
-                        <span className="text-base font-bold text-brand-primary">Total Amount</span>
-                        <span className="text-xl font-black text-brand-primary">${totalAmount.toFixed(2)}</span>
+                      
+                      <div className="bg-gray-50 rounded-2xl p-5 space-y-3 border border-gray-100">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-gray-500 font-medium">Rental Fee ({rentalDays} days)</span>
+                          <span className="font-bold text-brand-primary">${rentalFee.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs group cursor-help transition-colors hover:text-brand-accent">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-gray-500 font-medium">Trust & Safety / Insurance</span>
+                            <Info className="w-3.5 h-3.5 text-gray-300 group-hover:text-brand-accent" />
+                          </div>
+                          <span className="font-bold text-brand-primary">${trustSafetyFee.toFixed(2)}</span>
+                        </div>
+                        {deliveryType === 'courier' && (
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-500 font-medium">Door-to-Door Logistics</span>
+                            <span className="font-bold text-brand-primary">${deliveryFee.toFixed(2)}</span>
+                          </div>
+                        )}
+                        <div className="pt-3 mt-1 border-t border-gray-200 flex justify-between items-center">
+                          <span className="text-sm font-black text-brand-primary uppercase">Total to Pay</span>
+                          <span className="text-lg font-black text-brand-accent">${totalAmount.toFixed(2)}</span>
+                        </div>
                       </div>
                     </div>
 
                     {/* Pre-auth Banner */}
-                    <div className="bg-[#0F172A] rounded-2xl p-4 flex items-start gap-4">
-                      <div className="shrink-0 mt-0.5">
-                        <ShieldAlert className="w-5 h-5 text-trust-gold" />
+                    <div className="bg-brand-primary/5 rounded-2xl p-5 flex items-start gap-4 border border-brand-primary/10 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-2 opacity-5 scale-150 rotate-12 transition-transform group-hover:scale-110">
+                        <ShieldCheck className="w-16 h-16 text-brand-primary" />
                       </div>
-                      <div className="space-y-1">
-                        <h5 className="text-xs font-bold text-white uppercase tracking-wider">Pre-authorization Hold</h5>
-                        <p className="text-[11px] text-gray-400 leading-relaxed">
-                          To prevent theft, the full value of this item <span className="text-white font-bold">(${holdAmount.toLocaleString()})</span> will be held on your card during the rental period.
+                      <div className="shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-brand-primary text-white flex items-center justify-center shadow-lg shadow-brand-primary/20">
+                          <Lock className="w-6 h-6" />
+                        </div>
+                      </div>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <h5 className="text-[10px] font-black text-brand-primary uppercase tracking-widest">Temporary Authorization Hold</h5>
+                          <span className="bg-trust-green text-white text-[8px] font-black px-1.5 rounded uppercase">Verified</span>
+                        </div>
+                        <p className="text-[11px] text-gray-500 leading-relaxed pr-4">
+                          To protect the host, the full item value <span className="text-brand-primary font-black">(${holdAmount.toLocaleString()})</span> will be held. 100% released instantly after return inspection.
                         </p>
                       </div>
                     </div>
