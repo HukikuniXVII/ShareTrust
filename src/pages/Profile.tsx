@@ -1,20 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ShieldCheck, Star, MapPin, Calendar, BadgeCheck, MessageCircle, Share2, Award, UserPlus, Fingerprint } from 'lucide-react';
+import { ShieldCheck, Star, MapPin, Calendar, BadgeCheck, MessageCircle, Share2, Award, UserPlus, Fingerprint, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { MOCK_USERS, MOCK_GEAR } from '../constants/mockData';
 import { cn } from '../lib/utils';
+import { api } from '../lib/api';
+import { User, GearItem } from '../types';
 import IdentityVerificationModal from '../components/IdentityVerificationModal';
 
 export default function Profile() {
   const { id } = useParams();
   const [showVerification, setShowVerification] = useState(false);
-  const [, setTick] = useState(0); // For forcing re-render
-  const user = MOCK_USERS.find(u => u.id === (id || 'u1')) || MOCK_USERS[0];
-  const userGear = MOCK_GEAR.filter(g => g.ownerId === user.id);
+  const [user, setUser] = useState<User | null>(null);
+  const [userGear, setUserGear] = useState<GearItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const userId = id || 'u1';
+    Promise.all([api.getUser(userId), api.getGearItems()])
+      .then(([fetchedUser, allGear]) => {
+        setUser(fetchedUser);
+        setUserGear(allGear.filter(g => g.ownerId === fetchedUser.id));
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, [id]);
 
   // For demo: show verification section only on "my" profile (u1)
   const isMyProfile = !id || id === 'u1';
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-accent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <div className="text-center py-20">User not found</div>;
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -117,8 +141,9 @@ export default function Profile() {
         isOpen={showVerification} 
         onClose={() => setShowVerification(false)}
         onComplete={() => {
-          user.isVerified = true;
-          setTick(t => t + 1);
+          if (user) {
+            user.isVerified = true;
+          }
         }}
       />
 

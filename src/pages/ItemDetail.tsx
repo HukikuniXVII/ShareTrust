@@ -1,19 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, ShieldCheck, ChevronRight, MessageCircle, Calendar, Timer, Info, CheckCircle2, BadgeCheck, Lock } from 'lucide-react';
+import { Star, MapPin, ShieldCheck, ChevronRight, MessageCircle, Calendar, Timer, Info, CheckCircle2, BadgeCheck, Lock, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { MOCK_GEAR, MOCK_USERS } from '../constants/mockData';
 import { cn } from '../lib/utils';
-import { RentalStatus } from '../types';
+import { RentalStatus, GearItem, User } from '../types';
+import { api } from '../lib/api';
 import CheckoutModal from '../components/CheckoutModal';
 
 export default function ItemDetail() {
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  
-  const item = MOCK_GEAR.find(g => g.id === id) || MOCK_GEAR[0];
-  const owner = MOCK_USERS.find(u => u.id === item.ownerId);
+  const [item, setItem] = useState<GearItem | null>(null);
+  const [owner, setOwner] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    
+    api.getGearItem(id)
+      .then(async (fetchedItem) => {
+        setItem(fetchedItem);
+        try {
+          const fetchedOwner = await api.getUser(fetchedItem.ownerId);
+          setOwner(fetchedOwner);
+        } catch (e) {
+          console.error('Failed to fetch owner', e);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-accent" />
+      </div>
+    );
+  }
+
+  if (!item) {
+    return (
+      <div className="text-center py-20 space-y-4">
+        <h3 className="text-xl font-bold text-brand-primary">Item not found</h3>
+        <Link to="/" className="text-brand-accent hover:underline">Back to Marketplace</Link>
+      </div>
+    );
+  }
 
   // Mocking current user score
   const currentUserRenterScore = 5;

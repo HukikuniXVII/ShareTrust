@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Fingerprint, CheckCircle2, Camera, Lock, ShieldAlert, CreditCard, Wallet, ExternalLink, Loader2, ShieldCheck, MessageSquare, Calendar, PenTool, FileSignature, Shield, UserCheck, Plus, AlertCircle, ArrowRight, Truck, Store, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { GearItem } from '../types';
-import { MOCK_USERS } from '../constants/mockData';
+import { GearItem, User } from '../types';
 import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -124,8 +124,17 @@ export default function CheckoutModal({ isOpen, onClose, item }: CheckoutModalPr
   const [step, setStep] = React.useState<'summary' | 'verifying' | 'signing' | 'success'>('summary');
   const [deliveryType, setDeliveryType] = useState<'pickup' | 'courier'>('pickup');
   const [isAgreed, setIsAgreed] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
   const navigate = useNavigate();
-  const currentUser = MOCK_USERS[0];
+  
+  useEffect(() => {
+    if (isOpen) {
+      api.getUsers().then(setUsers).catch(console.error);
+    }
+  }, [isOpen]);
+
+  const currentUser = users[0] || { isVerified: false };
+  const owner = users.find(u => u.id === item.ownerId) || users[0];
   const isVerified = currentUser.isVerified;
 
   const rentalDays = 3;

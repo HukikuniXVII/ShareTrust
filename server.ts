@@ -3,15 +3,19 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import { ClerkExpressRequireAuth, ClerkExpressWithAuth } from '@clerk/clerk-sdk-node';
+import { db } from './src/db';
+import { gearItems, users } from './src/db/schema';
+import { eq, desc } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
 
 app.use(express.json());
-
-// Gemini API Setup
+app.use(ClerkExpressWithAuth());
 const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
   console.warn("GEMINI_API_KEY is missing from environment variables.");
@@ -43,6 +47,70 @@ app.post("/api/extract-images", async (req, res) => {
   } catch (error) {
     console.error("Extraction error:", error);
     res.status(500).json({ error: "Failed to extract images" });
+  }
+});
+
+// --- Gear Endpoints ---
+app.get("/api/gear", async (req, res) => {
+  try {
+    const items = await db.select().from(gearItems).all();
+    res.json(items);
+  } catch (error) {
+    console.error("Error fetching gear:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/api/gear/:id", async (req, res) => {
+  try {
+    const item = await db.select().from(gearItems).where(eq(gearItems.id, req.params.id)).get();
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post("/api/gear", ClerkExpressRequireAuth(), async (req, res) => {
+  try {
+    // @ts-ignore - req.auth is injected by Clerk
+    const userId = req.auth.userId;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const newItem = {
+      ...req.body,
+      id: uuidv4(),
+      ownerId: userId,
+      rating: 5.0,
+      reviewCount: 0,
+      status: "Available"
+    };
+
+    await db.insert(gearItems).values(newItem);
+    res.status(201).json(newItem);
+  } catch (error) {
+    console.error("Error creating gear:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// --- User Endpoints ---
+app.get("/api/users", async (req, res) => {
+  try {
+    const allUsers = await db.select().from(users).all();
+    res.json(allUsers);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/api/users/:id", async (req, res) => {
+  try {
+    const user = await db.select().from(users).where(eq(users.id, req.params.id)).get();
+    if (!user) return res.status(404).json({ error: "Not found" });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

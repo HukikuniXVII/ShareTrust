@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Camera, Link as LinkIcon, Plus, X, Loader2, Sparkles, AlertCircle, CheckCircle2, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
 import { cn } from '../lib/utils';
 import { Category } from '../types';
+import { api } from '../lib/api';
 
 export default function ListingTool() {
+  const navigate = useNavigate();
+  const { getToken } = useAuth();
   const [step, setStep] = useState(1);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [htmlInput, setHtmlInput] = useState('');
   const [extractedImages, setExtractedImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
@@ -57,6 +63,21 @@ export default function ListingTool() {
         ? prev.images.filter(i => i !== url) 
         : [...prev.images, url]
     }));
+  };
+
+  const handlePublish = async () => {
+    try {
+      setIsPublishing(true);
+      const token = await getToken();
+      if (!token) throw new Error("Not authenticated");
+      const newItem = await api.createGearItem({...formData, tags: []}, token);
+      navigate(`/item/${newItem.id}`);
+    } catch (error) {
+      console.error("Failed to create listing:", error);
+      alert("Failed to create listing. Please try again.");
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   return (
@@ -304,9 +325,11 @@ export default function ListingTool() {
                   Back
                 </button>
                 <button
-                  className="flex-[2] py-4 bg-brand-accent text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-opacity-90 shadow-lg shadow-brand-accent/20 transition-all"
+                  onClick={handlePublish}
+                  disabled={isPublishing}
+                  className="flex-[2] py-4 bg-brand-accent text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-opacity-90 shadow-lg shadow-brand-accent/20 transition-all disabled:opacity-50"
                 >
-                  Publish Listing
+                  {isPublishing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Publish Listing"}
                 </button>
               </div>
            </motion.div>

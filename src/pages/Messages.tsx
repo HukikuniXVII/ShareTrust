@@ -1,16 +1,35 @@
-import React, { useState } from 'react';
-import { Search, Send, ChevronLeft, MoreVertical, MapPin, Calendar, Camera, MessageCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Send, ChevronLeft, MoreVertical, MapPin, Calendar, Camera, MessageCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MOCK_USERS } from '../constants/mockData';
+import { api } from '../lib/api';
+import { User } from '../types';
 import { cn } from '../lib/utils';
 
 export default function Messages() {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [messageText, setMessageText] = useState('');
 
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    api.getUsers()
+      .then(setUsers)
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  if (isLoading || users.length < 2) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-10rem)]">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-accent" />
+      </div>
+    );
+  }
+
   const chats = [
-    { id: '1', user: MOCK_USERS[0], lastMessage: 'Is the camera available this Saturday?', time: '2m', unread: 1 },
-    { id: '2', user: MOCK_USERS[1], lastMessage: 'Great, see you at the Starbucks!', time: '1h', unread: 0 },
+    { id: '1', user: users[0], lastMessage: 'Is the camera available this Saturday?', time: '2m', unread: 1 },
+    { id: '2', user: users[1], lastMessage: 'Great, see you at the Starbucks!', time: '1h', unread: 0 },
   ];
 
   return (

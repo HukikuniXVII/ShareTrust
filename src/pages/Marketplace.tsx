@@ -1,23 +1,44 @@
-import React, { useState } from 'react';
-import { Search, SlidersHorizontal, MapPin, Star, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, SlidersHorizontal, MapPin, Star, ShieldCheck, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { MOCK_GEAR, MOCK_USERS } from '../constants/mockData';
-import { Category, RentalStatus } from '../types';
+import { Category, RentalStatus, GearItem, User } from '../types';
 import { cn } from '../lib/utils';
+import { api } from '../lib/api';
 
 export default function Marketplace() {
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [gear, setGear] = useState<GearItem[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([api.getGearItems(), api.getUsers()])
+      .then(([gearData, usersData]) => {
+        setGear(gearData);
+        setUsers(usersData);
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const categories = ['All', ...Object.values(Category)];
 
-  const filteredGear = MOCK_GEAR.filter(item => {
+  const filteredGear = gear.filter(item => {
     const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           item.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-accent" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -71,7 +92,7 @@ export default function Marketplace() {
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredGear.map((item, index) => {
-          const owner = MOCK_USERS.find(u => u.id === item.ownerId);
+          const owner = users.find(u => u.id === item.ownerId);
           return (
             <motion.div
               key={item.id}

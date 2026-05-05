@@ -7,6 +7,7 @@ import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Plus, User, MessageSquare, LayoutDashboard, Compass, ShieldCheck } from 'lucide-react';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 import { cn } from './lib/utils';
 
 // Lazy load components
@@ -59,13 +60,21 @@ function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Link 
-            to="/list-item"
-            className="bg-brand-primary text-white px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-opacity-90 transition-all shadow-lg shadow-brand-primary/10"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden xs:inline">Share Gear</span>
-          </Link>
+          <SignedIn>
+            <Link 
+              to="/list-item"
+              className="bg-brand-primary text-white px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-opacity-90 transition-all shadow-lg shadow-brand-primary/10"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden xs:inline">Share Gear</span>
+            </Link>
+            <UserButton />
+          </SignedIn>
+          <SignedOut>
+            <div className="bg-brand-primary text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-opacity-90 transition-all cursor-pointer">
+              <SignInButton mode="modal" />
+            </div>
+          </SignedOut>
           <button className="md:hidden p-2 text-gray-500 hover:text-brand-primary transition-colors">
             <Search className="w-5 h-5" />
           </button>

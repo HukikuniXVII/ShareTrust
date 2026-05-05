@@ -1,14 +1,27 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, ReceiptText, Clock, Bell, Settings, Package, ArrowUpRight, ArrowDownLeft, ShieldCheck, CheckCircle2, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, Clock, Bell, Settings, Package, ArrowUpRight, ArrowDownLeft, ShieldCheck, CheckCircle2, ChevronRight, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { MOCK_GEAR } from '../constants/mockData';
+import { api } from '../lib/api';
+import { GearItem } from '../types';
 import { cn } from '../lib/utils';
 import { RentalStatus } from '../types';
 import HandoverChecklist from '../components/HandoverChecklist';
 
 export default function Dashboard() {
   const [showHandover, setShowHandover] = useState(false);
-  const [selectedGear, setSelectedGear] = useState(MOCK_GEAR[0]);
+  const [gear, setGear] = useState<GearItem[]>([]);
+  const [selectedGear, setSelectedGear] = useState<GearItem | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    api.getGearItems()
+      .then(items => {
+        setGear(items);
+        if (items.length > 0) setSelectedGear(items[0]);
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
   const stats = [
     { label: 'Active Rentals', value: '3', icon: Package, color: 'text-brand-accent' },
     { label: 'Pending Requests', value: '2', icon: Clock, color: 'text-trust-gold' },
@@ -30,10 +43,16 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 relative">
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-brand-accent" />
+        </div>
+      ) : (
+      <>
       <HandoverChecklist 
         isOpen={showHandover} 
         onClose={() => setShowHandover(false)} 
-        item={selectedGear} 
+        item={selectedGear!} 
         type="pickup"
       />
 
@@ -68,10 +87,10 @@ export default function Dashboard() {
 
           <div className="flex flex-col md:flex-row md:items-center gap-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
             <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-sm shrink-0">
-               <img src={MOCK_GEAR[0].images[0]} alt="" className="w-full h-full object-cover" />
+               <img src={gear[0]?.images[0]} alt="" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 space-y-1">
-              <h3 className="text-lg font-black text-brand-primary">{MOCK_GEAR[0].name}</h3>
+              <h3 className="text-lg font-black text-brand-primary">{gear[0]?.name}</h3>
               <p className="text-sm text-gray-500 font-medium">Recipient: <span className="text-brand-primary font-bold">James Wilson</span></p>
               <div className="flex items-center gap-3 mt-2">
                 <span className="flex items-center gap-1.5 text-[10px] font-bold text-trust-green uppercase">
@@ -84,7 +103,7 @@ export default function Dashboard() {
             </div>
             <button 
               onClick={() => {
-                setSelectedGear(MOCK_GEAR[0]);
+                if (gear[0]) setSelectedGear(gear[0]);
                 setShowHandover(true);
               }}
               className="w-full md:w-auto px-8 py-4 bg-brand-primary text-white rounded-2xl font-black text-sm shadow-xl shadow-brand-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
@@ -153,7 +172,7 @@ export default function Dashboard() {
             <button className="text-xs font-bold text-brand-accent uppercase tracking-wider">Manage</button>
           </div>
           <div className="space-y-4">
-            {MOCK_GEAR.slice(0, 3).map((item, i) => (
+            {gear.slice(0, 3).map((item, i) => (
               <div key={i} className="flex items-center gap-4">
                 <img src={item.images[0]} alt={item.name} className="w-12 h-12 rounded-xl object-cover border border-gray-100" />
                 <div className="flex-1 min-w-0">
@@ -174,6 +193,8 @@ export default function Dashboard() {
           </div>
         </section>
       </div>
+      </>
+      )}
     </div>
   );
 }
