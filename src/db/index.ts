@@ -10,7 +10,16 @@ const dbPath = process.env.DB_PATH || path.join(process.cwd(), 'sqlite.db');
 // Ensure the directory exists before initializing SQLite
 const dir = path.dirname(dbPath);
 if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir, { recursive: true });
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+  } catch (error: any) {
+    if (error.code === 'EACCES') {
+      console.error(`\n❌ ERROR: Permission denied when trying to create directory: ${dir}`);
+      console.error(`If you are deploying on Render, make sure you have created a Persistent Disk and mounted it at the correct path (e.g., /data).`);
+      console.error(`Alternatively, remove the DB_PATH environment variable to use the default local path.\n`);
+    }
+    throw error;
+  }
 }
 
 // Initialize better-sqlite3
