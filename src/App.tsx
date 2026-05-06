@@ -140,11 +140,39 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Marketplace />} />
               <Route path="/item/:id" element={<ItemDetail />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile" element={
+                <>
+                  <SignedIn><Profile /></SignedIn>
+                  <SignedOut><div className="flex flex-col items-center justify-center h-64"><h2 className="text-xl font-bold mb-4">Please sign in to view your profile</h2><SignInButton mode="modal">
+                      <button className="bg-brand-primary text-white px-6 py-2 rounded-full font-bold shadow-lg">Sign In</button>
+                    </SignInButton></div></SignedOut>
+                </>
+              } />
               <Route path="/profile/:id" element={<Profile />} />
-              <Route path="/list-item" element={<ListingTool />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/messages" element={<Messages />} />
+              <Route path="/list-item" element={
+                <>
+                  <SignedIn><ListingTool /></SignedIn>
+                  <SignedOut><div className="flex flex-col items-center justify-center h-64"><h2 className="text-xl font-bold mb-4">Please sign in to share gear</h2><SignInButton mode="modal">
+                      <button className="bg-brand-primary text-white px-6 py-2 rounded-full font-bold shadow-lg">Sign In</button>
+                    </SignInButton></div></SignedOut>
+                </>
+              } />
+              <Route path="/dashboard" element={
+                <>
+                  <SignedIn><Dashboard /></SignedIn>
+                  <SignedOut><div className="flex flex-col items-center justify-center h-64"><h2 className="text-xl font-bold mb-4">Please sign in to view your dashboard</h2><SignInButton mode="modal">
+                      <button className="bg-brand-primary text-white px-6 py-2 rounded-full font-bold shadow-lg">Sign In</button>
+                    </SignInButton></div></SignedOut>
+                </>
+              } />
+              <Route path="/messages" element={
+                <>
+                  <SignedIn><Messages /></SignedIn>
+                  <SignedOut><div className="flex flex-col items-center justify-center h-64"><h2 className="text-xl font-bold mb-4">Please sign in to view your messages</h2><SignInButton mode="modal">
+                      <button className="bg-brand-primary text-white px-6 py-2 rounded-full font-bold shadow-lg">Sign In</button>
+                    </SignInButton></div></SignedOut>
+                </>
+              } />
               <Route path="/policies" element={<Policies />} />
               <Route path="/legal" element={<Legal />} />
             </Routes>
