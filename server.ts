@@ -1,5 +1,4 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path from "path";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
@@ -114,9 +113,11 @@ app.get("/api/users/:id", async (req, res) => {
   }
 });
 
-// Vite middleware setup
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
+    // เรียก import vite เฉพาะตอนที่ไม่ใช่ production
+    const { createServer: createViteServer } = await import("vite");
+
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
